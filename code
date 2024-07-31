@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Set the original and new user names
+OLD_USER="one"
+NEW_USER="twoo"
+
+# Create the new user
+sudo useradd -m -s /bin/bash $NEW_USER
+
+# Copy configuration files
+sudo cp -r /home/$OLD_USER/. /home/$NEW_USER/
+sudo chown -R $NEW_USER:$NEW_USER /home/$NEW_USER/
+
+# Copy groups and memberships
+GROUPS=$(id -nG $OLD_USER | sed "s/ /,/g")
+sudo usermod -aG $GROUPS $NEW_USER
+
+# Copy the password
+OLD_PASSWD=$(sudo grep "^$OLD_USER:" /etc/shadow | cut -d: -f2)
+sudo usermod -p "$OLD_PASSWD" $NEW_USER
+
+echo "New user $NEW_USER has been successfully created and settings have been copied from $OLD_USER."
